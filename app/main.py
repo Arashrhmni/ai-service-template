@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+app = FastAPI(title="AI Service Template", version="0.1.0")
 
 
 @app.get("/")
-def read_root():
-    return {"message": "Hello World"}
+async def root():
+    return {"status": "ok", "service": "ai-service-template", "day": 2}

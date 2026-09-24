@@ -16,31 +16,31 @@ This isn't a tutorial clone. It's built incrementally, with each piece added and
 
 ## Architecture
 
-┌─────────────────────────────────────────┐
-│ FastAPI app │
-│ ┌──────────┐ ┌──────────┐ ┌─────────┐ │
-│ │ routes │ │ services │ │ schemas │ │
-│ │ (health, │ │ (business│ │(Pydantic│ │
-│ │ items) │ │ logic) │ │ models) │ │
-│ └──────────┘ └──────────┘ └─────────┘ │
-│ │ │ │
-│ ┌────▼────┐ ┌─────▼─────┐ │
-│ │ Postgres│ │ Redis │ │
-│ │ (asyncpg│ │ (caching, │ │
-│ │+SQLModel)│ │ rate-limit│ │
-│ └─────────┘ └───────────┘ │
-└─────────────────────────────────────────┘
+```
+Client
+  |
+  v
+FastAPI app
+  |
+  +-- routes/    (health, items)       - HTTP layer, request/response
+  +-- services/  (business logic)      - orchestrates DB + Redis calls
+  +-- schemas/   (Pydantic models)     - request/response validation
+  +-- models/    (SQLModel + Postgres) - persisted data
+        |
+        +--> Postgres (asyncpg + SQLModel)
+        +--> Redis (caching, rate-limiting)
+```
 
 Requests flow through a clear separation of concerns: **routes** handle HTTP and validation, **services** hold business logic, **models/schemas** define the data shape at the DB and API boundary respectively. This separation is what makes the codebase extensible — the `Item` resource below is a placeholder for the `Document` resource that a future RAG pipeline will use, following the exact same pattern.
 
 ## Features so far
 
-- ✅ Async FastAPI app with a clean routes → services → db layering
-- ✅ Dependency-aware `/health` endpoint that independently checks Postgres and Redis, returning `200` only when both are reachable and `503` with a clear per-dependency error otherwise
-- ✅ Typed configuration via `pydantic-settings`, driven by environment variables / `.env`
-- ✅ Full CRUD example (`Item` resource) with Alembic-managed schema migrations
-- ✅ Fully Dockerized: `docker compose up --build` brings up the entire stack with health-checked startup ordering
-- ✅ Live-reload for code changes without rebuilding the image
+- Async FastAPI app with a clean routes -> services -> db layering
+- Dependency-aware `/health` endpoint that independently checks Postgres and Redis, returning `200` only when both are reachable and `503` with a clear per-dependency error otherwise
+- Typed configuration via `pydantic-settings`, driven by environment variables / `.env`
+- Full CRUD example (`Item` resource) with Alembic-managed schema migrations
+- Fully Dockerized: `docker compose up --build` brings up the entire stack with health-checked startup ordering
+- Live-reload for code changes without rebuilding the image
 
 ## Getting started
 
@@ -77,22 +77,23 @@ curl http://localhost:8000/items/1
 
 ## Project structure
 
+```
 app/
-├── main.py # FastAPI app entrypoint
-├── config.py # typed settings from env vars
-├── db.py # async SQLAlchemy engine/session
-├── redis_client.py # async Redis client
-├── models.py # SQLModel table definitions
-├── schemas.py # Pydantic request/response models
-├── routes/
-│ ├── health.py
-│ └── items.py
-└── services/
-└── items_service.py
-alembic/ # migration environment + versions
+  main.py                 FastAPI app entrypoint
+  config.py                typed settings from env vars
+  db.py                     async SQLAlchemy engine/session
+  redis_client.py           async Redis client
+  models.py                 SQLModel table definitions
+  schemas.py                Pydantic request/response models
+  routes/
+    health.py
+    items.py
+  services/
+    items_service.py
+alembic/                  migration environment + versions
 docker-compose.yml
 Dockerfile
-
+```
 
 ## Roadmap
 

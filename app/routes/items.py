@@ -7,6 +7,7 @@ from app.services import items_service
 
 router = APIRouter(prefix="/items", tags=["items"])
 
+
 @router.post("", response_model=ItemRead, status_code=201)
 async def create_item(data: ItemCreate, session: AsyncSession = Depends(get_session)):
     item = await items_service.create_item(session, data)

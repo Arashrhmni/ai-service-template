@@ -1,6 +1,6 @@
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-import structlog
 
 from app.logging_conf import configure_logging
 from app.middleware import RequestContextMiddleware

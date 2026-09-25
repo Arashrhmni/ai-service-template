@@ -1,5 +1,5 @@
-from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 from app.models import Item
 from app.schemas import ItemCreate
